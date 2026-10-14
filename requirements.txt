@@ -1,0 +1,12 @@
+pandas
+numpy
+scikit-learn>=1.4
+xgboost
+catboost
+lightgbm 
+joblib
+fastapi
+uvicorn
+python-multipart
+kaggle
+matplotlib

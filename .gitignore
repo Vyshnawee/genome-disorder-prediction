@@ -1,0 +1,50 @@
+# Python
+__pycache__/
+*.py[cod]
+
+# Virtual environment
+.venv/
+venv/
+env/
+
+# Environment variables
+.env
+.env.*
+!.env.example
+
+# IDE
+.vscode/
+.idea/
+
+
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+logs/
+
+# Generated artifacts
+artifacts/
+
+# Trained models
+models/
+checkpoints/
+
+# Processed/generated data
+data/processed/
+data/working/
+data/interim/
+data/temp/
+
+# Python cache
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# Build files
+*.egg-info/
+dist/
+build/

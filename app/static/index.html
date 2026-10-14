@@ -1,0 +1,166 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>GeneScope Master</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='8' fill='%234f46e5'/><path d='M11 6c0 7 10 7 10 13s-10 6-10 7M21 6c0 7-10 7-10 13s10 6 10 7' stroke='white' stroke-width='2.2' fill='none' stroke-linecap='round'/></svg>">
+  <link rel="stylesheet" href="/static/styles.css">
+</head>
+<body>
+
+<header class="topbar">
+  <div class="topbar-inner">
+    <div class="brand">
+      <svg class="brand-mark" viewBox="0 0 32 32" aria-hidden="true">
+        <rect width="32" height="32" rx="9"/>
+        <path d="M11 6c0 7 10 7 10 13s-10 6-10 7M21 6c0 7-10 7-10 13s10 6 10 7"/>
+      </svg>
+      <div>
+        <div class="brand-name">GeneScope</div>
+        <div class="brand-sub">Version 3 · Genetic Disease Predictor</div>
+      </div>
+    </div>
+    <nav class="tabs" role="tablist">
+      <button class="tab active" data-view="predict">Predict</button>
+      <button class="tab" data-view="batch">Batch</button>
+      <button class="tab" data-view="performance">Performance</button>
+      <button class="tab" data-view="about">About</button>
+    </nav>
+  </div>
+</header>
+
+<main class="container">
+
+  <!-- ================= PREDICT ================= -->
+  <section id="view-predict" class="view active">
+    <div class="page-head">
+      <div>
+        <h1>Patient assessment</h1>
+        <p class="muted">Enter the patient's lab results. Leave a test empty if it was not done, and the model will handle it.</p>
+      </div>
+      <div class="head-actions">
+        <button class="btn ghost" id="btn-sample" title="Load a random real patient the model never saw in training">
+          <svg viewBox="0 0 24 24"><path d="M4 4h16v16H4z M8 8h.01M16 16h.01M12 12h.01"/></svg>
+          Load sample patient
+        </button>
+        <button class="btn ghost" id="btn-reset">Reset</button>
+      </div>
+    </div>
+
+    <div class="predict-layout">
+      <form id="patient-form" class="form-col" novalidate>
+        <div id="form-sections"><div class="skeleton">Loading form…</div></div>
+        <div class="form-footer">
+          <button type="submit" class="btn primary lg" id="btn-predict">
+            <span>Predict disease</span>
+            <svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+          </button>
+        </div>
+      </form>
+
+      <aside class="result-col">
+        <div class="card result-card" id="result-card">
+          <div class="result-empty" id="result-empty">
+            <div class="empty-icon">
+              <svg viewBox="0 0 24 24"><path d="M9 3c0 5 6 5 6 9s-6 4-6 9M15 3c0 5-6 5-6 9s6 4 6 9M9.5 7.5h5M9.5 16.5h5"/></svg>
+            </div>
+            <h3>No prediction yet</h3>
+            <p class="muted">Fill in the patient details and press <b>Predict disease</b>.</p>
+          </div>
+          <div class="result-body hidden" id="result-body"></div>
+        </div>
+        <div class="card scores-card" id="model-scores"><div class="muted small">Loading model scores…</div></div>
+        <p class="disclaimer">For education only. This is not a medical diagnosis.</p>
+      </aside>
+    </div>
+  </section>
+
+  <!-- ================= BATCH ================= -->
+  <section id="view-batch" class="view">
+    <div class="page-head">
+      <div>
+        <h1>Batch prediction</h1>
+        <p class="muted">Upload a CSV with the same column names as the dataset. If it also has an <code>Actual Disease</code> or <code>Disease</code> column, accuracy is checked automatically. Try <code>data/processed/holdout_patients_with_answers.csv</code>.</p>
+      </div>
+    </div>
+
+    <label class="dropzone" id="dropzone">
+      <input type="file" id="batch-file" accept=".csv" hidden>
+      <svg viewBox="0 0 24 24"><path d="M12 16V4M7 9l5-5 5 5M4 16v3a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-3"/></svg>
+      <div class="dz-title">Drop a CSV here or <u>browse</u></div>
+      <div class="muted small">Up to 20,000 rows</div>
+    </label>
+
+    <div id="batch-output" class="hidden">
+      <div class="kpis" id="batch-kpis"></div>
+      <div class="card">
+        <div class="card-head">
+          <h3>Results <span class="muted small" id="batch-note"></span></h3>
+          <button class="btn primary" id="btn-download">Download CSV</button>
+        </div>
+        <div class="table-wrap"><table class="table" id="batch-table"></table></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= PERFORMANCE ================= -->
+  <section id="view-performance" class="view">
+    <div class="page-head">
+      <div>
+        <h1>Model performance</h1>
+        <p class="muted" id="perf-sub">Measured on patients the model never saw during training.</p>
+      </div>
+    </div>
+    <div id="perf-content"><div class="skeleton">Loading metrics…</div></div>
+  </section>
+
+  <!-- ================= ABOUT ================= -->
+  <section id="view-about" class="view">
+    <div class="page-head"><div><h1>About this project</h1></div></div>
+    <div class="about-grid">
+      <div class="card prose">
+        <h3>What it does</h3>
+        <p>GeneScope predicts which of five <b>genetic diseases</b> a patient most likely has, from routine lab results and genetic markers:</p>
+        <ul>
+          <li><b>Thalassemia</b>: low hemoglobin, high fetal hemoglobin</li>
+          <li><b>Hemophilia</b>: inherited clotting-factor disorder</li>
+          <li><b>Breast Cancer (BRCA1/p53)</b>: high BRCA1 expression, p53 mutation</li>
+          <li><b>Sickle Cell Anemia</b>: high share of sickled red cells</li>
+          <li><b>Cystic Fibrosis</b>: high sweat chloride</li>
+        </ul>
+      </div>
+      <div class="card prose">
+        <h3>How it works</h3>
+        <ol>
+          <li><b>Data</b>: <i>Genetic Disease Prediction Dataset</i> from Kaggle (1,000 patients, 12 features, CC-BY-SA-4.0). The original file is kept untouched and a working copy is used.</li>
+          <li><b>Clean and validate</b>: checks for missing values, duplicates and invalid labels.</li>
+          <li><b>Split</b>: 20% of patients are held back and never used in training.</li>
+          <li><b>Train</b>: five models are compared with 5-fold cross-validation, and the one with the most reliable probabilities is kept.</li>
+          <li><b>Evaluate</b>: final scores come from the held-back patients only.</li>
+        </ol>
+      </div>
+      <div class="card prose">
+        <h3>Reading the result</h3>
+        <p><b>Confidence</b> is the model's probability for its top answer.</p>
+        <ul>
+          <li><span class="badge high">High</span> 80% or more</li>
+          <li><span class="badge moderate">Moderate</span> 50–80%</li>
+          <li><span class="badge low">Low</span> below 50%. Treat the result as uncertain.</li>
+        </ul>
+        <p>Missing tests are filled with typical values, so results are more reliable when the key marker for each disease is entered.</p>
+      </div>
+      <div class="card prose">
+        <h3>Limitations</h3>
+        <p>The dataset is <b>synthetic but realistic</b> (as stated by its author) and contains 1,000 patients. Every patient has one of the five diseases, so the model always picks one of them and cannot say "healthy".</p>
+        <p class="muted">Educational project. Not for clinical use.</p>
+      </div>
+    </div>
+  </section>
+</main>
+
+<div class="toast hidden" id="toast"></div>
+
+<script src="/static/app.js"></script>
+</body>
+</html>
